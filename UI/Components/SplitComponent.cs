@@ -68,6 +68,8 @@ namespace LiveSplit.UI.Components
         public IList<SimpleLabel> LabelsList { get; set; }
 
         private Regex SubsplitRegex = new Regex(@"^{(.+)}\s*(.+)$", RegexOptions.Compiled);
+        private Regex FASItemFmt1Regex = new Regex(@"AS:\[[\w\d,=-]+\]");
+        private Regex FASItemFmt2Regex = new Regex(@"AS:\([\w\d,=-]+\)");
 
         public float VerticalHeight { get; set; }
 
@@ -397,7 +399,7 @@ namespace LiveSplit.UI.Components
                 SectionTimerFormatter = new RegularSplitTimeFormatter(Settings.SectionTimerAccuracy);
                 CurrentSectionTimerAccuracy = Settings.SectionTimerAccuracy;
             }
-            
+
             if (mode == LayoutMode.Vertical)
             {
                 NameLabel.VerticalAlignment = StringAlignment.Center;
@@ -501,7 +503,7 @@ namespace LiveSplit.UI.Components
                 var sizeMultiplier = bigFont.Size / (bigFont.FontFamily.GetEmHeight(bigFont.Style));
                 var ascent = sizeMultiplier * bigFont.FontFamily.GetCellAscent(bigFont.Style);
                 var descent = sizeMultiplier * bigFont.FontFamily.GetCellDescent(bigFont.Style);
-                
+
                 if (state.Run.IndexOf(Split) >= state.CurrentSplitIndex)
                 {
                     double h, s, v;
@@ -611,7 +613,7 @@ namespace LiveSplit.UI.Components
         {
             return (state.Run[splitNumber].Comparisons[comparison][method] - (topNumber > 0 ? state.Run[topNumber - 1].Comparisons[comparison][method] : TimeSpan.Zero));
         }
-        
+
         private TimeSpan? getSectionDelta(LiveSplitState state, int splitNumber, int topNumber, string comparison, TimingMethod method)
         {
             return getSectionTime(state, splitNumber, topNumber, comparison, method) - getSectionComparison(state, splitNumber, topNumber, comparison, method);
@@ -659,19 +661,29 @@ namespace LiveSplit.UI.Components
                 IsHighlight = (SplitsSettings.HilightSplit == Split);
                 IsSubsplit = Split.Name.StartsWith("-") && Split != state.Run.Last();
 
+                // We will display the splits without the sub-splits information, or auto splitter instructions.
+                var cleanSplitName = Split.Name;
+
                 if (IsSubsplit)
-                    NameLabel.Text = Split.Name.Substring(1);
+                    cleanSplitName = Split.Name.Substring(1);
                 else
                 {
                     Match match = SubsplitRegex.Match(Split.Name);
                     if (match.Success) {
                         if (CollapsedSplit || Header)
-                            NameLabel.Text = match.Groups[1].Value;
+                            cleanSplitName = match.Groups[1].Value;
                         else
-                            NameLabel.Text = match.Groups[2].Value;
-                    } else
-                        NameLabel.Text = Split.Name;
+                            cleanSplitName = match.Groups[2].Value;
+                    }
                 }
+
+                // Remove all auto-splitter instructions from the name of the split that will be displayed.
+                cleanSplitName = FASItemFmt1Regex.Replace(cleanSplitName, "");
+                cleanSplitName = FASItemFmt2Regex.Replace(cleanSplitName, "");
+                cleanSplitName = cleanSplitName.Trim();
+
+                // Use clean split name as display name.
+                NameLabel.Text = cleanSplitName;
 
                 var splitIndex = state.Run.IndexOf(Split);
 
