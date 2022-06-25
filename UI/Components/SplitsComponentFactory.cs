@@ -5,7 +5,7 @@ namespace LiveSplit.UI.Components
 {
     public class SplitsComponentFactory : IComponentFactory
     {
-        public string ComponentName => "Subsplits";
+        public string ComponentName => "SubsplitsFAS";
 
         public string Description => "Displays a list of split times and deltas in relation to a comparison. Only shows subsplits when relevant";
 
@@ -15,7 +15,7 @@ namespace LiveSplit.UI.Components
 
         public string UpdateName => ComponentName;
 
-        public string XMLURL => "http://livesplit.org/update/Components/update.LiveSplit.Subsplits.xml";
+        public string XMLURL => "http://livesplit.org/update/Components/noupdates.xml";
 
         public string UpdateURL => "http://livesplit.org/update/";
 

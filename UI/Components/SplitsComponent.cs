@@ -44,7 +44,7 @@ namespace LiveSplit.UI.Components
         protected IEnumerable<ColumnData> ColumnsList { get { return Settings.ColumnsList.Select(x => x.Data); } }
 
         public string ComponentName
-          => "Subsplits";
+          => "SubsplitsFAS";
 
         public float VerticalHeight => InternalComponent.VerticalHeight;
 
